@@ -1,4 +1,7 @@
 # VSCode Getting Started Template
+
+**NOTE: This branch is for _EARLY_ Support for E1C DevKit.**
+
 A simple CMSIS-Pack based example to setup and test VS Code development environment for Alif Ensemble kits.
 
 - The solution consists of following projects:
