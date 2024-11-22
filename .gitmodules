@@ -1,0 +1,6 @@
+[submodule "libs/common_app_utils"]
+	path = libs/common_app_utils
+	url = org-115832732@github.com:AlifSemiDev/common_app_utils_DEV.git
+[submodule "libs/board"]
+	path = libs/board
+	url = org-115832732@github.com:AlifSemiDev/boardlib_DEV.git
