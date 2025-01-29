@@ -18,6 +18,20 @@ Original Author: Shay Gal-on
 #include "coremark.h"
 #include "core_portme.h"
 
+// Board specific
+#include <time.h>
+
+#include "RTE_Components.h"
+#include CMSIS_device_header
+
+#include <stdio.h>
+
+#include "alifs_profile.h"
+#include "board.h"
+#include "uart_tracelib.h"
+#include "fault_handler.h"
+
+
 #if VALIDATION_RUN
 volatile ee_s32 seed1_volatile = 0x3415;
 volatile ee_s32 seed2_volatile = 0x3415;
@@ -42,10 +56,8 @@ volatile ee_s32 seed5_volatile = 0;
    time.h and windows.h definitions included.
 */
 CORETIMETYPE
-barebones_clock()
-{
-#error \
-    "You must implement a method to measure time in barebones_clock()! This function should return current time.\n"
+barebones_clock(){
+    return alifs_profile_cycles_to_ns(alifs_profile_start()) * 1e-9;
 }
 /* Define : TIMER_RES_DIVIDER
         Divider to trade off timer resolution and total time that can be
@@ -122,6 +134,11 @@ time_in_secs(CORE_TICKS ticks)
 
 ee_u32 default_num_contexts = 1;
 
+
+static void uart_callback(uint32_t event)
+{
+}
+
 /* Function : portable_init
         Target specific initialization code
         Test for some common mistakes.
@@ -129,8 +146,20 @@ ee_u32 default_num_contexts = 1;
 void
 portable_init(core_portable *p, int *argc, char *argv[])
 {
-#error \
-    "Call board initialization routines in portable init (if needed), in particular initialize UART!\n"
+    // BOARD INIT
+
+    // Init pinmux using boardlib
+    BOARD_Pinmux_Init();
+
+    // Use common_app_utils for printing
+    tracelib_init(NULL, uart_callback);
+
+    fault_dump_enable(true);
+
+
+    BOARD_LED2_Control(BOARD_LED_STATE_HIGH);
+    printf("portable_init::Init Done");
+
 
     (void)argc; // prevent unused warning
     (void)argv; // prevent unused warning
