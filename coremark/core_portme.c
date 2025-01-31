@@ -55,9 +55,8 @@ volatile ee_s32 seed5_volatile = 0;
    cpu clock cycles performance counter etc. Sample implementation for standard
    time.h and windows.h definitions included.
 */
-CORETIMETYPE
-barebones_clock(){
-    return alifs_profile_cycles_to_ns(alifs_profile_start()) * 1e-9;
+CORETIMETYPE barebones_clock(){
+    return (CORETIMETYPE) alifs_profile_start();
 }
 /* Define : TIMER_RES_DIVIDER
         Divider to trade off timer resolution and total time that can be
@@ -69,13 +68,15 @@ barebones_clock(){
         */
 #define GETMYTIME(_t)              (*_t = barebones_clock())
 #define MYTIMEDIFF(fin, ini)       ((fin) - (ini))
-#define TIMER_RES_DIVIDER          1
+#define TIMER_RES_DIVIDER          10
 #define SAMPLE_TIME_IMPLEMENTATION 1
-#define EE_TICKS_PER_SEC           (CLOCKS_PER_SEC / TIMER_RES_DIVIDER)
+#define EE_TICKS_PER_SEC           (GetSystemCoreClock() / TIMER_RES_DIVIDER)
 
 /** Define Host specific (POSIX), or target specific global time variables. */
 static CORETIMETYPE start_time_val, stop_time_val;
 
+/**Define Host specific clock counter variables */
+static uint32_t start_counter_val, end_counter_val;
 /* Function : start_time
         This function will be called right before starting the timed portion of
    the benchmark.
@@ -87,7 +88,7 @@ static CORETIMETYPE start_time_val, stop_time_val;
 void
 start_time(void)
 {
-    GETMYTIME(&start_time_val);
+    start_counter_val = alifs_profile_start();
 }
 /* Function : stop_time
         This function will be called right after ending the timed portion of the
@@ -100,7 +101,7 @@ start_time(void)
 void
 stop_time(void)
 {
-    GETMYTIME(&stop_time_val);
+    end_counter_val = alifs_profile_end(start_counter_val);
 }
 /* Function : get_time
         Return an abstract "ticks" number that signifies time on the system.
@@ -114,9 +115,7 @@ stop_time(void)
 CORE_TICKS
 get_time(void)
 {
-    CORE_TICKS elapsed
-        = (CORE_TICKS)(MYTIMEDIFF(stop_time_val, start_time_val));
-    return elapsed;
+    return end_counter_val;
 }
 /* Function : time_in_secs
         Convert the value returned by get_time to seconds.
@@ -158,7 +157,8 @@ portable_init(core_portable *p, int *argc, char *argv[])
 
 
     BOARD_LED2_Control(BOARD_LED_STATE_HIGH);
-    printf("portable_init::Init Done");
+    printf("core_portme::portable_init::Board Init Done\n");
+    printf("ITERATIONS %d\n", ITERATIONS);
 
 
     (void)argc; // prevent unused warning

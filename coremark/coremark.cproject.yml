@@ -22,7 +22,7 @@ project:
         - file: ../libs/common_app_utils/fault_handler/fault_handler.c
         - file: ../libs/common_app_utils/profiling/alifs_profile.h
   define:
-    - ITERATIONS: 0
+    - ITERATIONS: 15000
     - CLOCKS_PER_SEC: 400_000_000
 
   output:
